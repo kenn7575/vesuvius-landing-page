@@ -25,11 +25,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <header className="bg-orange-950 text-white py-4">
+        <nav className="container mx-auto flex justify-between items-center px-4">
+          <h1 className="text-2xl font-bold">
+            <a href="/" className="hover:underline">Cafe Vesuvius</a>
+          </h1>
+          <ul className="flex space-x-6">
+            <li>
+              <a href="/menu" className="text-lg hover:underline">Menu</a>
+            </li>
+            <li>
+              <a href="/reservation" className="text-lg hover:underline">Reservation</a>
+            </li>
+          </ul>
+        </nav>
+      </header>
+      {children}
+    </body>
     </html>
   );
 }
