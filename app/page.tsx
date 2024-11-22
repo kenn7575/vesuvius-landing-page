@@ -1,6 +1,6 @@
 "use client";
 import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, SetStateAction } from "react";
 import { startOfMonth, endOfMonth, getDay } from "date-fns";
 import { enGB } from "date-fns/locale";
 
@@ -24,7 +24,15 @@ const STYLES = {
 async function fetchAvailabilityData(
   startDate: Date,
   endDate: Date,
-  setModifiers
+  setModifiers: {
+    (
+      value: SetStateAction<{
+        unavailable: never[];
+        partiallyUnavailable: never[];
+      }>
+    ): void;
+    (arg0: { unavailable: any; partiallyUnavailable: any }): void;
+  }
 ) {
   try {
     const startDateString = startDate.toISOString().split("T")[0];
@@ -38,11 +46,16 @@ async function fetchAvailabilityData(
     console.log("🚀 ~ data:", data);
 
     const unavailable = data
-      .filter((item) => item.availability === "Unavailable")
-      .map((item) => new Date(item.date));
+      .filter(
+        (item: { availability: string }) => item.availability === "Unavailable"
+      )
+      .map((item: { date: string | number | Date }) => new Date(item.date));
     const partiallyUnavailable = data
-      .filter((item) => item.availability === "PartiallyAvailable")
-      .map((item) => new Date(item.date));
+      .filter(
+        (item: { availability: string }) =>
+          item.availability === "PartiallyAvailable"
+      )
+      .map((item: { date: string | number | Date }) => new Date(item.date));
 
     setModifiers({ unavailable, partiallyUnavailable });
   } catch (error) {
@@ -79,7 +92,10 @@ export default function Home() {
     console.log(modifiers);
   }, [startDate]);
 
-  const handleMonthChange = useCallback((newMonth) => setMonth(newMonth), []);
+  const handleMonthChange = useCallback(
+    (newMonth: SetStateAction<Date>) => setMonth(newMonth),
+    []
+  );
 
   return (
     <Calendar
