@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+    <head>
+      <title>Cafe Vesuvius</title>
+    </head>
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <header className="bg-orange-950 text-white py-4">
         <nav className="container mx-auto flex justify-between items-center px-4">

@@ -1,112 +1,91 @@
-"use client";
-import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useState, useCallback, SetStateAction } from "react";
-import { startOfMonth, endOfMonth, getDay } from "date-fns";
-import { enGB } from "date-fns/locale";
+export const revalidate = 900;
+import Image from "next/image";
 
-const MODIFIER_STYLES = {
-  unavailable: { backgroundColor: "red" },
-  partiallyUnavailable: { backgroundColor: "orange" },
+type MenuItem = {
+    name: string;
+    description: string;
+    price_in_oere: number;
+    image_path: string;
 };
 
-const STYLES = {
-  months: { fontSize: "2rem" },
-  caption: { fontSize: "1.2rem" },
-  caption_label: { fontSize: "1.2rem", padding: "1rem" },
-  table: { width: "100%", borderSpacing: "0.5rem" },
-  head_cell: { width: "4rem", height: "4rem", fontSize: "1rem" },
-  cell: { width: "4rem", height: "4rem" },
-  day: { width: "4rem", height: "4rem", fontSize: "1.2rem" },
-  nav_button_previous: { width: "4rem", height: "4rem" },
-  nav_button_next: { width: "4rem", height: "4rem" },
+type Menu = {
+    name: string;
+    is_food: boolean;
+    menu_item: MenuItem[] | undefined;
 };
 
-async function fetchAvailabilityData(
-  startDate: Date,
-  endDate: Date,
-  setModifiers: {
-    (
-      value: SetStateAction<{
-        unavailable: never[];
-        partiallyUnavailable: never[];
-      }>
-    ): void;
-    (arg0: { unavailable: any; partiallyUnavailable: any }): void;
-  }
-) {
-  try {
-    const startDateString = startDate.toISOString().split("T")[0];
-    const endDateString = endDate.toISOString().split("T")[0];
+// Fetch menu data
+async function getMenu(): Promise<Menu[]> {
+    const res = await fetch("http://localhost:5005/menu", { next: { revalidate: 3600 } });
 
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:5005";
-    const response = await fetch(
-      `${backendUrl}/reservations/range?start_date=${startDateString}&end_date=${endDateString}`
-    );
-    const data = await response.json();
-    console.log("🚀 ~ data:", data);
+    if (!res.ok) {
+        throw new Error("Failed to fetch data");
+    }
 
-    const unavailable = data
-      .filter(
-        (item: { availability: string }) => item.availability === "Unavailable"
-      )
-      .map((item: { date: string | number | Date }) => new Date(item.date));
-    const partiallyUnavailable = data
-      .filter(
-        (item: { availability: string }) =>
-          item.availability === "PartiallyAvailable"
-      )
-      .map((item: { date: string | number | Date }) => new Date(item.date));
-
-    setModifiers({ unavailable, partiallyUnavailable });
-  } catch (error) {
-    console.error("Error fetching availability data:", error);
-  }
+    return res.json();
 }
 
-export default function Home() {
-  const [month, setMonth] = useState(new Date());
-  const [startDate, setStartDate] = useState(startOfMonth(month));
-  const [endDate, setEndDate] = useState(endOfMonth(month));
-  const [modifiers, setModifiers] = useState({
-    unavailable: [],
-    partiallyUnavailable: [],
-  });
+// Helper function to randomly select two MenuItem objects
+function getRandomItems(menu: Menu[]): MenuItem[] {
+    const foodItems = menu
+        .filter((category) => category.is_food && category.menu_item) // Filter food categories
+        .flatMap((category) => category.menu_item || []); // Flatten all food items into one array
 
-  useEffect(() => {
-    const firstDayOfWeek = getDay(startOfMonth(month)) || 7;
-    const daysToSubtract = firstDayOfWeek - 1;
-    const firstVisibleDate = new Date(startOfMonth(month));
-    firstVisibleDate.setDate(firstVisibleDate.getDate() - daysToSubtract);
+    if (foodItems.length < 2) {
+        throw new Error("Not enough food items available to select two unique items.");
+    }
 
-    const lastDayOfWeek = getDay(endOfMonth(month)) || 7;
-    const daysToAdd = 7 - lastDayOfWeek;
-    const lastVisibleDate = new Date(endOfMonth(month));
-    lastVisibleDate.setDate(lastVisibleDate.getDate() + daysToAdd);
+    // Select two unique random indices
+    const firstIndex = Math.floor(Math.random() * foodItems.length);
+    let secondIndex;
+    do {
+        secondIndex = Math.floor(Math.random() * foodItems.length);
+    } while (secondIndex === firstIndex);
 
-    setStartDate(firstVisibleDate);
-    setEndDate(lastVisibleDate);
-  }, [month]);
+    return [foodItems[firstIndex], foodItems[secondIndex]];
+}
 
-  useEffect(() => {
-    fetchAvailabilityData(startDate, endDate, setModifiers);
-    console.log(modifiers);
-  }, [startDate]);
+// Menu page component
+export default async function MenuPage() {
+    const data = await getMenu();
+    const randomItems = getRandomItems(data);
 
-  const handleMonthChange = useCallback(
-    (newMonth: SetStateAction<Date>) => setMonth(newMonth),
-    []
-  );
-
-  return (
-    <Calendar
-      locale={enGB}
-      month={month}
-      weekStartsOn={1}
-      onMonthChange={handleMonthChange}
-      className="rounded-md border w-fit"
-      modifiersStyles={MODIFIER_STYLES}
-      modifiers={modifiers}
-      styles={STYLES}
-    />
-  );
+    return (
+        <main className="menu px-4 py-8">
+            <h2 className="text-4xl text-orange-950 mb-4">Oplev vores spændende menu</h2>
+            <p className="text-gray-700 mb-8">
+                Gå til menuen for at se mere af vores spændende udvalg!{" "}
+                <a
+                    href="/menu"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >Se hele menuen</a>
+            </p>
+            <ul className="space-y-6">
+                {randomItems.map((item, index) => (
+                    <li
+                        key={index}
+                        className={`border-b border-gray-200 pb-4 ${
+                            index === 1 ? "flex-row-reverse" : ""
+                        } flex items-center flex-wrap gap-4`}
+                    >
+                        {/* Image with specific styles */}
+                        <Image
+                            src={`/img/${item.image_path}`}
+                            alt={item.name}
+                            className={`w-32 h-32 object-cover shadow-md rounded-full`}
+                            width={300}
+                            height={300}
+                            priority={index === 0} // Prioritize loading the first image for better LCP
+                        />
+                        {/* Content */}
+                        <div className="text-center sm:text-left flex-1">
+                            <h3 className="text-lg font-semibold">{item.name}</h3>
+                            <p className="italic text-gray-600">{item.description}</p>
+                            <p className="text-lg text-gray-700">{item.price_in_oere / 100} kr</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </main>
+    );
 }
