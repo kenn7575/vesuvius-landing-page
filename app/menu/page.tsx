@@ -27,12 +27,16 @@ export default async function MenuPage() {
     const data = await getMenu();
 
     return (
-        <main className="menu px-4 py-8">
-            <h1 className="text-4xl text-orange-950 mb-6">Menu</h1>
+        <main className="menu bg-gray-100">
+            <h1 className="text-4xl mb-6 pt-8 text-center border-b border-gray-500 border-dashed">Menu</h1>
             <ul className="space-y-6">
-                {data.map((category: Menu) => (
-                    <li key={category.name} className="pb-4">
-                        {/* Category Name */}
+                {data.map((category: Menu, index) => (
+                    <li
+                        key={category.name}
+                        className={`pb-4 px-4 py-4 ${
+                            index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                        }`}
+                    >
                         <h2 className="text-2xl font-bold mb-4">{category.name}</h2>
                         <ul className="space-y-4 ml-6">
                             {category.menu_item && Array.isArray(category.menu_item) ? (

@@ -51,41 +51,50 @@ export default async function MenuPage() {
     const randomItems = getRandomItems(data);
 
     return (
-        <main className="menu px-4 py-8">
-            <h2 className="text-4xl text-orange-950 mb-4">Oplev vores spændende menu</h2>
-            <p className="text-gray-700 mb-8">
-                Gå til menuen for at se mere af vores spændende udvalg!{" "}
+        <main className="menu flex flex-col items-center min-h-screen">
+            <article className="bg-gray-100 px-4 py-8 text-center w-full">
+                <h2 className="text-4xl mb-4">Oplev vores spændende menu</h2>
+                <p className="text-gray-700 mb-8">
+                    Vi har sammensat en spændende menu, så du kan få den bedste cafe oplevelse
+                </p>
                 <a
                     href="/menu"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >Se hele menuen</a>
-            </p>
-            <ul className="space-y-6">
-                {randomItems.map((item, index) => (
-                    <li
-                        key={index}
-                        className={`border-b border-gray-200 pb-4 ${
-                            index === 1 ? "flex-row-reverse" : ""
-                        } flex items-center flex-wrap gap-4`}
-                    >
-                        {/* Image with specific styles */}
-                        <Image
-                            src={`/img/${item.image_path}`}
-                            alt={item.name}
-                            className={`w-32 h-32 object-cover shadow-md rounded-full`}
-                            width={300}
-                            height={300}
-                            priority={index === 0} // Prioritize loading the first image for better LCP
-                        />
-                        {/* Content */}
-                        <div className="text-center sm:text-left flex-1">
-                            <h3 className="text-lg font-semibold">{item.name}</h3>
-                            <p className="italic text-gray-600">{item.description}</p>
-                            <p className="text-lg text-gray-700">{item.price_in_oere / 100} kr</p>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                    className="inline-block pl-4 pr-4 h-12 align-middle pt-2 bg-orange-600 text-white text-xl rounded-full items-center justify-center hover:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                >
+                    Se menuen
+                </a>
+            </article>
+
+            <aside className="bg-white px-8 py-8 w-full max-w-[800px]">
+                <ul className="space-y-6">
+                    {randomItems.map((item, index) => (
+                        <li
+                            key={index}
+                            className={`pb-4 flex items-center flex-wrap gap-4 ${
+                                index === 1 ? "flex-row-reverse" : ""
+                            }`}
+                        >
+                            <Image
+                                src={`/img/${item.image_path}`}
+                                alt={item.name}
+                                className={`w-32 h-32 object-cover rounded-full ${
+                                    index === 0
+                                        ? "shadow-[-10px_-10px_0px_0px_orange]" // Top-left shadow
+                                        : "shadow-[10px_10px_0px_0px_orange]" // Bottom-right shadow
+                                }`}
+                                width={300}
+                                height={300}
+                                priority={index === 0}
+                            />
+                            <div className="text-center sm:text-left flex-1">
+                                <h3 className="text-lg font-semibold">{item.name}</h3>
+                                <p className="italic text-gray-600">{item.description}</p>
+                                <p className="text-lg text-gray-700">{item.price_in_oere / 100} kr</p>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </aside>
         </main>
     );
 }
