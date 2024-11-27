@@ -1,112 +1,127 @@
 "use client";
-import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useState, useCallback, SetStateAction } from "react";
-import { startOfMonth, endOfMonth, getDay } from "date-fns";
-import { enGB } from "date-fns/locale";
+import { InfoCard } from "./infoCard";
+import { DateCard } from "./dateCard";
+import { TimeCard } from "./timeCard";
+import React, { useEffect, useState, useCallback, useActionState } from "react";
+import { ModifiersType } from "./types";
+import { dateInfo, fetchAvailableDays, fetchAvailableTimes } from "./helpers";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const MODIFIER_STYLES = {
-    unavailable: { backgroundColor: "red" },
-    partiallyUnavailable: { backgroundColor: "orange" },
-};
+export default function Home(): JSX.Element {
+  const initialMonth: Date = new Date();
+  const { firstVisibleDate, lastVisibleDate } = dateInfo(initialMonth);
 
-const STYLES = {
-    months: { fontSize: "2rem" },
-    caption: { fontSize: "1.2rem" },
-    caption_label: { fontSize: "1.2rem", padding: "1rem" },
-    table: { width: "100%", borderSpacing: "0.5rem" },
-    head_cell: { width: "4rem", height: "4rem", fontSize: "1rem" },
-    cell: { width: "4rem", height: "4rem" },
-    day: { width: "4rem", height: "4rem", fontSize: "1.2rem" },
-    nav_button_previous: { width: "4rem", height: "4rem" },
-    nav_button_next: { width: "4rem", height: "4rem" },
-};
+  //set initial state
+  const [month, setMonth] = useState<Date>(initialMonth);
+  const [startDate, setStartDate] = useState<Date>(firstVisibleDate);
+  const [endDate, setEndDate] = useState<Date>(lastVisibleDate);
+  const [modifiers, setModifiers] = useState<ModifiersType>({
+    unavailable: [],
+    partiallyUnavailable: [],
+    selected: [],
+    past: [],
+  });
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [selectedDay, setSelectedDay] = useState<string | undefined>();
+  const [peopleCount, setPeopleCount] = useState<number>(2);
+  const [activeTab, setActiveTab] = useState("day");
+  const [selectedTime, setSelectedTime] = useState<string>();
 
-async function fetchAvailabilityData(
-    startDate: Date,
-    endDate: Date,
-    setModifiers: {
-        (
-            value: SetStateAction<{
-                unavailable: never[];
-                partiallyUnavailable: never[];
-            }>
-        ): void;
-        (arg0: { unavailable: never[]; partiallyUnavailable: never[] }): void;
-    }
-) {
-    try {
-        const startDateString = startDate.toISOString().split("T")[0];
-        const endDateString = endDate.toISOString().split("T")[0];
+  // Update startDate and endDate when month changes
+  useEffect(() => {
+    const { firstVisibleDate, lastVisibleDate } = dateInfo(month);
 
-        const backendUrl = process.env.BACKEND_URL || "http://localhost:5005";
-        const response = await fetch(
-            `${backendUrl}/reservations/range?start_date=${startDateString}&end_date=${endDateString}`
-        );
-        const data = await response.json();
-        console.log("🚀 ~ data:", data);
+    setStartDate(firstVisibleDate);
+    setEndDate(lastVisibleDate);
+  }, [month]);
 
-        const unavailable = data
-            .filter(
-                (item: { availability: string }) => item.availability === "Unavailable"
-            )
-            .map((item: { date: string | number | Date }) => new Date(item.date));
-        const partiallyUnavailable = data
-            .filter(
-                (item: { availability: string }) =>
-                    item.availability === "PartiallyAvailable"
-            )
-            .map((item: { date: string | number | Date }) => new Date(item.date));
+  // Fetch availability data when startDate or endDate changes
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoaded(false);
+      await fetchAvailableDays(startDate, endDate, setModifiers, modifiers);
+      setIsLoaded(true);
+    };
+    fetchData();
+  }, [startDate, endDate]);
 
-        setModifiers({ unavailable, partiallyUnavailable });
-    } catch (error) {
-        console.error("Error fetching availability data:", error);
-    }
-}
+  // Handle month change
+  const handleMonthChange = useCallback(
+    (newMonth: Date) => {
+      // Update month only if it has changed
+      if (newMonth.getTime() !== month.getTime()) {
+        setMonth(newMonth);
+      }
+    },
+    [month]
+  );
 
-export default function Home() {
-    const [month, setMonth] = useState(new Date());
-    const [startDate, setStartDate] = useState(startOfMonth(month));
-    const [endDate, setEndDate] = useState(endOfMonth(month));
-    const [modifiers, setModifiers] = useState({
-        unavailable: [],
-        partiallyUnavailable: [],
-    });
+  // Handle day click
+  const handleDayClick = useCallback(
+    async (date: Date, count: number) => {
+      setSelectedTime(undefined);
 
-    useEffect(() => {
-        const firstDayOfWeek = getDay(startOfMonth(month)) || 7;
-        const daysToSubtract = firstDayOfWeek - 1;
-        const firstVisibleDate = new Date(startOfMonth(month));
-        firstVisibleDate.setDate(firstVisibleDate.getDate() - daysToSubtract);
+      const data = await fetchAvailableTimes(date, count);
+      setAvailableTimes(data.availableTimes);
+      setSelectedDay(date.toLocaleDateString("en-CA"));
+      setActiveTab("time");
+    },
+    [setAvailableTimes]
+  );
 
-        const lastDayOfWeek = getDay(endOfMonth(month)) || 7;
-        const daysToAdd = 7 - lastDayOfWeek;
-        const lastVisibleDate = new Date(endOfMonth(month));
-        lastVisibleDate.setDate(lastVisibleDate.getDate() + daysToAdd);
+  useEffect(() => {}, [selectedDay]);
 
-        setStartDate(firstVisibleDate);
-        setEndDate(lastVisibleDate);
-    }, [month]);
+  return (
+    <div className="flex items-center flex-col mt-16">
+      <div className="mb-16">
+        <h1 className="text-5xl">Velkommen til vores reservations side</h1>
+        <h2 className="text-xl mt-4">
+          Vælg en dato og antal personer for at se tilgængelighed og reservere
+          et bord.
+        </h2>
+      </div>
 
-    useEffect(() => {
-        fetchAvailabilityData(startDate, endDate, setModifiers);
-        console.log(modifiers);
-    }, [startDate]);
-
-    const handleMonthChange = useCallback(
-        (newMonth: SetStateAction<Date>) => setMonth(newMonth),
-        []
-    );
-
-    return (
-        <Calendar
-            locale={enGB}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="day">Dag</TabsTrigger>
+          <TabsTrigger disabled={!selectedDay} value="time">
+            Tidspunkt
+          </TabsTrigger>
+          <TabsTrigger disabled={!selectedTime || !selectedDay} value="info">
+            Information
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="day">
+          <DateCard
+            setPeopleCount={setPeopleCount}
+            parseInt={parseInt}
+            isLoaded={isLoaded}
             month={month}
-            weekStartsOn={1}
-            onMonthChange={handleMonthChange}
-            className="rounded-md border w-fit"
-            modifiersStyles={MODIFIER_STYLES}
+            setModifiers={setModifiers}
+            handleDayClick={handleDayClick}
+            peopleCount={peopleCount}
+            handleMonthChange={handleMonthChange}
             modifiers={modifiers}
-            styles={STYLES}
-        />
-    );
+          />
+        </TabsContent>
+        <TabsContent value="time">
+          <TimeCard
+            availableTimes={availableTimes}
+            selectedTime={selectedTime}
+            setSelectedTime={setSelectedTime}
+            setActiveTab={setActiveTab}
+          />
+        </TabsContent>
+
+        <TabsContent value="info">
+          <InfoCard
+            peopleCount={peopleCount}
+            selectedDay={selectedDay}
+            selectedTime={selectedTime}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }
