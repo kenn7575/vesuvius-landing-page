@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -39,6 +40,7 @@ export function InfoCard({
   selectedTime: string | undefined;
   peopleCount: number;
 }) {
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -73,14 +75,17 @@ export function InfoCard({
     })
       .then((response) => {
         if (response.ok) {
-          alert("Reservationen er blevet oprettet");
+          const params = new URLSearchParams();
+          params.append("count", peopleCount.toString());
+          params.append("date", dateForReservation.toString());
+          router.push(`/reservation/confirmation?${params.toString()}`);
         } else {
-          alert("Der skete en fejl under oprettelsen af reservationen");
+          alert("Der skete en fejl under oprettelsen af reservationen 1");
         }
       })
       .catch((error) => {
         console.error("Error creating reservation:", error);
-        alert("Der skete en fejl under oprettelsen af reservationen");
+        alert("Der skete en fejl under oprettelsen af reservationen " + error);
       });
   }
 
