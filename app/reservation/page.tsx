@@ -73,16 +73,22 @@ export default function Home(): JSX.Element {
   useEffect(() => {}, [selectedDay]);
 
   return (
-    <div className="flex items-center flex-col mt-16">
-      <div className="mb-16">
-        <h1 className="text-5xl">Velkommen til vores reservations side</h1>
+    <div className="flex items-center flex-col pb-16 bg-[url('/img/bg.jpg')] bg-cover bg-no-repeat bg-top">
+      {/* Undskyld mads, havde ikke tid til at SEO optimere dette billede ):  */}
+      <div className="pt-16 mb-16 w-full text-background  text-center bg-gradient-to-b from-foreground/90 md:via-transparent via-foreground/80 ">
+        <h1 className="text-5xl font-semibold">
+          Velkommen til vores reservations side
+        </h1>
         <h2 className="text-xl mt-4">
           Vælg en dato og antal personer for at se tilgængelighed og reservere
           et bord.
         </h2>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs
+        value={activeTab}
+        className="scale-[70%] sm:scale-100 "
+        onValueChange={setActiveTab}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="day">Dag</TabsTrigger>
           <TabsTrigger disabled={!selectedDay} value="time">

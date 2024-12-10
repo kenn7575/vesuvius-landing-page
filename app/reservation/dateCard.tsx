@@ -48,8 +48,8 @@ export function DateCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Vælg dato</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl">Vælg dato og antal</CardTitle>
+        <CardDescription className="text-md">
           Se hvilke dage der er ledige og vælg en dato for reservationen.
         </CardDescription>
       </CardHeader>
@@ -112,7 +112,7 @@ export function DateCard({
               handleDayClick(day, peopleCount);
             }}
             onMonthChange={handleMonthChange}
-            className="rounded-md border w-fit"
+            className="rounded-md border flex justify-center w-full"
             modifiersStyles={MODIFIER_STYLES}
             modifiers={modifiers}
             styles={STYLES}

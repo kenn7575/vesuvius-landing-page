@@ -23,8 +23,8 @@ export function TimeCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Vælg tidspunkt</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl">Vælg tidspunkt</CardTitle>
+        <CardDescription className="text-md">
           Vælg et tidspunkt for reservationen. Du har bordet i 2 timer.
         </CardDescription>
       </CardHeader>

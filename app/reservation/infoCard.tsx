@@ -92,8 +92,8 @@ export function InfoCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Skriv dine oplysninger</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl">Skriv dine oplysninger</CardTitle>
+        <CardDescription className="text-md">
           Udfyld formeularen med dine oplysninger for at reservere et bord.
         </CardDescription>
       </CardHeader>
@@ -108,9 +108,11 @@ export function InfoCard({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Navn</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Navn <span className="text-red-500 text-2xl">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Mig" {...field} />
+                    <Input placeholder="Jeff" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,11 +123,13 @@ export function InfoCard({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Email <span className="text-red-500 text-2xl">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="Mig@eksemple.dk"
+                      placeholder="Jeff@eksemple.dk"
                       {...field}
                     />
                   </FormControl>
@@ -138,7 +142,10 @@ export function InfoCard({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefon nummer</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Telefon nummer{" "}
+                    <span className="text-red-500 text-2xl">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input type="tel" placeholder="12 34 56 78" {...field} />
                   </FormControl>
@@ -151,7 +158,9 @@ export function InfoCard({
               name="comment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Kommentar</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Evt. kommentar
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Eks. allergier" {...field} />
                   </FormControl>
@@ -159,7 +168,9 @@ export function InfoCard({
                 </FormItem>
               )}
             />
-            <Button type="submit">Book bord</Button>
+            <Button type="submit" className="text-xl" size="lg">
+              Book bord
+            </Button>
           </form>
         </Form>
       </CardContent>

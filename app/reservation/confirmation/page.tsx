@@ -10,29 +10,26 @@ import { RestaurantInfo } from "@/components/reservation/resatrant-info";
 
 export default function ReservationConfirmation() {
   return (
-    <main className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <CheckCircle className="h-16 w-16 text-green-500" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">
+    <main className="min-h-screen bg-background bg-[url('/img/bg.jpg')] bg-cover bg-no-repeat bg-top">
+      <div className=" mx-auto backdrop-blur-xl py-16 px-4 w-full min-h-screen flex  items-center flex-col">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl mb-4 text-background font-semibold tracking-tight">
             Reservation er sendt
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-background max-w-[40rem] text-xl text-center">
             Tak fordi du har reserveret et bord hos os. Vi glæder os til at se
             dig. Du vil modtage en bekræftelse på din reservation på mail, når
             den er godkendt.
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 max-w-2xl">
           <ReservationDetails />
           <Separator className="my-6" />
           <RestaurantInfo />
         </Card>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button variant="outline" asChild>
             <Link href="/">Return to Home</Link>
           </Button>
