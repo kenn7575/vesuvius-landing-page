@@ -13,18 +13,8 @@ export function ReservationDetails() {
 
   // convert the params to a number
   const peopleCount = parseInt(count ?? "0", 10);
-  console.log(
-    "🚀 ~ ReservationDetails ~ peopleCount:",
-    peopleCount,
-    typeof peopleCount
-  );
 
   const parsedDate = new Date(date ?? "");
-  console.log(
-    "🚀 ~ ReservationDetails ~ parsedDate:",
-    parsedDate,
-    typeof parsedDate
-  );
 
   return (
     <div className="space-y-6">
